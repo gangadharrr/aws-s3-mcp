@@ -3,15 +3,17 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { listBucketsTool } from './tools/listBuckets';
-import { createBucketTool } from './tools/createBucket';
-import { deleteBucketTool } from './tools/deleteBucket';
-import { listObjectsTool } from './tools/listObjects';
-import { uploadObjectTool } from './tools/uploadObject';
-import { downloadObjectTool } from './tools/downloadObject';
-import { deleteObjectTool } from './tools/deleteObject';
-import { getBucketPolicyTool } from './tools/getBucketPolicy';
-import { setBucketPolicyTool } from './tools/setBucketPolicy';
+import { 
+  listBucketsTool,
+  createBucketTool,
+  deleteBucketTool,
+  listObjectsTool,
+  uploadObjectTool,
+  downloadObjectTool,
+  deleteObjectTool,
+  getBucketPolicyTool,
+  setBucketPolicyTool
+ } from './tools';
 
 // Create MCP server with stdio transport
 const server = new McpServer({
@@ -191,3 +193,4 @@ server.connect(transport).catch((err) => {
   console.error('Failed to start MCP server:', err);
   process.exit(1);
 });
+
