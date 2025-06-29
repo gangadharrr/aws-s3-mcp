@@ -1,11 +1,11 @@
 {
-  "name": "aws-s3-mcp",
+  "name": "@gangadharrr/aws-s3",
   "version": "1.0.0",
   "description": "Model Context Protocol server for AWS S3 operations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin":{
-    "@open-mcp/aws-s3": "dist/index.js"
+  "bin": {
+    "@gangadharrr/aws-s3": "dist/index.js"
   },
   "files": [
     "dist"
@@ -20,8 +20,7 @@
     "aws",
     "s3",
     "mcp",
-    "model-context-protocol",
-    "hai-framework"
+    "model-context-protocol"
   ],
   "author": "",
   "license": "MIT",
