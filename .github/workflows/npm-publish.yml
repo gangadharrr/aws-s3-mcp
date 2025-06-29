@@ -19,12 +19,15 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - run: npm run build
       # Skip tests since they're not implemented yet
       # - run: npm test
+
   # Publish to npm registry
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,14 +36,19 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build
-      # First create/verify the npm account and scope
-      - name: Verify npm authentication
+      
+      # Create a clean .npmrc file for publishing
+      - name: Setup .npmrc file for publishing
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          npm whoami
-        env:
-          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
-      # Then publish the package
+          # Create a clean .npmrc file for publishing
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc
+          echo "registry=https://registry.npmjs.org/" >> .npmrc
+          echo "@gangadharrr:registry=https://registry.npmjs.org/" >> .npmrc
+          
+          # Display .npmrc (without the token)
+          cat .npmrc
+      
+      # Publish the package
       - name: Publish to npm
         run: npm publish --access public
         env:
