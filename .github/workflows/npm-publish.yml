@@ -39,4 +39,4 @@ jobs:
       - run: npm publish --access public
         env:
           # Use NPM_AUTOMATION_TOKEN instead of NODE_AUTH_TOKEN
-          NPM_AUTOMATION_TOKEN: ${{secrets.NPM_AUTOMATION_TOKEN}}
+          NPM_AUTOMATION_TOKEN: ${{secrets.NPM_TOKEN}}
