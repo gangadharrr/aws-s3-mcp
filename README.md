@@ -30,8 +30,8 @@ Create a configuration file for the MCP server:
 {
   "mcpServers": {
     "aws-s3": {
-      "command": "node",
-      "args": ["path/to/aws-s3-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["aws-s3"],
       "env": {
         "AWS_REGION": "us-east-1",
         "AWS_ACCESS_KEY_ID": "your-access-key-id",
