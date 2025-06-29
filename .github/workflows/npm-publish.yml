@@ -21,8 +21,7 @@ jobs:
       - run: npm ci
       # Skip tests since they're not implemented yet
       # - run: npm test
-
-  # Publish to npm registry (requires automation token that bypasses OTP)
+  # Publish to npm registry
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
@@ -34,9 +33,15 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build
-      # Create/update .npmrc file with the automation token
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_AUTOMATION_TOKEN" > ~/.npmrc
-      - run: npm publish --access public
+      # First create/verify the npm account and scope
+      - name: Verify npm authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm whoami
         env:
-          # Use NPM_AUTOMATION_TOKEN instead of NODE_AUTH_TOKEN
-          NPM_AUTOMATION_TOKEN: ${{secrets.NPM_TOKEN}}
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+      # Then publish the package
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
