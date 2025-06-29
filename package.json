@@ -4,6 +4,12 @@
   "description": "Model Context Protocol server for AWS S3 operations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin":{
+    "@open-mcp/aws-s3": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
