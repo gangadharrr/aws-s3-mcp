@@ -22,10 +22,29 @@ jobs:
       # Skip tests since they're not implemented yet
       # - run: npm test
 
+  # Build and publish to GitHub Packages (doesn't require OTP)
+  publish-github:
+    needs: build
+    runs-on: ubuntu-latest
+    # Run this job on all triggers (including push to main)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com/
+          scope: '@gangadharrr'
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  # Publish to npm registry (requires automation token that bypasses OTP)
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
-    # Only publish to npm on release events, not on every push to main
+    # Only publish to npm on release events or manual trigger
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +54,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run build
+      # Create/update .npmrc file with the automation token
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_AUTOMATION_TOKEN" > ~/.npmrc
       - run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          # Use NPM_AUTOMATION_TOKEN instead of NODE_AUTH_TOKEN
+          NPM_AUTOMATION_TOKEN: ${{secrets.NPM_AUTOMATION_TOKEN}}
