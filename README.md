@@ -1,6 +1,6 @@
 # AWS S3 MCP Server
 
-A Model Context Protocol (MCP) server for AWS S3 operations, designed to work with the HAI Framework.
+A Model Context Protocol (MCP) server for AWS S3 operations
 
 ## Features
 
@@ -21,23 +21,8 @@ This MCP server provides tools for interacting with AWS S3:
 - `get_bucket_policy` - Get the policy attached to a bucket
 - `set_bucket_policy` - Set or update a bucket policy
 
-## Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/aws-s3-mcp.git
-cd aws-s3-mcp
-
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-```
-
-## Usage with HAI Framework
-
-### Configuration
+### MCP Configuration
 
 Create a configuration file for the MCP server:
 
@@ -73,35 +58,6 @@ The MCP server provides the following tools:
 | `delete_object` | Deletes an object from a bucket | `bucketName`, `key` (both required) |
 | `get_bucket_policy` | Gets the policy for a bucket | `bucketName` (required) |
 | `set_bucket_policy` | Sets or updates a bucket policy | `bucketName`, `policy` (both required) |
-```
-
-### Integration with HAI Framework
-
-```typescript
-import { getToolsFromMcpServers } from '@hai/agent-tools';
-import { DeveloperAgent } from '@hai/agent-pool';
-import { AnthropicModels } from '@hai/agent-core';
-import fs from 'fs';
-
-// Read MCP server configurations
-const configData = fs.readFileSync('./mcpServers.json', 'utf-8');
-
-// Get MCP tools
-const mcpTools = await getToolsFromMcpServers(configData);
-
-// Create agent with MCP tools
-const agent = new DeveloperAgent({
-  model: AnthropicModels.CLAUDE_3_7_SONNET,
-  temperature: 0.7,
-  tools: [...mcpTools],
-  // ... other agent config
-});
-
-// Execute the agent with S3 operations
-const result = await agent.execute({
-  humanPrompt: "List all S3 buckets and show objects in the 'data' bucket"
-});
-```
 
 ## AWS Authentication
 
