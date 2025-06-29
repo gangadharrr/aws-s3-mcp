@@ -22,24 +22,6 @@ jobs:
       # Skip tests since they're not implemented yet
       # - run: npm test
 
-  # Build and publish to GitHub Packages (doesn't require OTP)
-  publish-github:
-    needs: build
-    runs-on: ubuntu-latest
-    # Run this job on all triggers (including push to main)
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: https://npm.pkg.github.com/
-          scope: '@gangadharrr'
-      - run: npm ci
-      - run: npm run build
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
   # Publish to npm registry (requires automation token that bypasses OTP)
   publish-npm:
     needs: build
