@@ -1,37 +1,39 @@
 # AWS S3 MCP Server
 
-A Model Context Protocol (MCP) server for AWS S3 operations
+[![npm version](https://img.shields.io/npm/v/@gangadharrr/aws-s3.svg)](https://www.npmjs.com/package/@gangadharrr/aws-s3)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP](https://img.shields.io/badge/MCP-compatible-blue.svg)](https://modelcontextprotocol.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-75%25-3178C6.svg)](https://www.typescriptlang.org)
 
-## Features
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that gives AI assistants (Claude, Cursor, etc.) direct access to AWS S3 — enabling them to list, upload, download, and manage S3 buckets and objects through natural language.
 
-This MCP server provides tools for interacting with AWS S3:
+---
 
-### Bucket Operations
-- `list_buckets` - List all S3 buckets in the AWS account
-- `create_bucket` - Create a new S3 bucket
-- `delete_bucket` - Delete an S3 bucket (must be empty)
+## Why This Exists
 
-### Object Operations
-- `list_objects` - List objects in a bucket with optional prefix filtering
-- `upload_object` - Upload a file or content to a bucket
-- `download_object` - Download an object from a bucket
-- `delete_object` - Delete an object from a bucket
+When building AI agent pipelines, you often need agents to read from or write to S3 — whether that's fetching documents for RAG, persisting outputs, or managing files dynamically. This MCP server bridges that gap by exposing S3 operations as MCP tools, so any MCP-compatible AI client can interact with S3 without custom integration work.
 
-### Policy Operations
-- `get_bucket_policy` - Get the policy attached to a bucket
-- `set_bucket_policy` - Set or update a bucket policy
+---
 
+## Prerequisites
 
-### MCP Configuration
+- Node.js 18+
+- AWS account with S3 access
+- AWS credentials (Access Key ID + Secret, or IAM role)
+- An MCP-compatible client (Claude Desktop, Cursor, etc.)
 
-Create a configuration file for the MCP server:
+---
+
+## Quick Start
+
+### 1. Install via npx (no installation needed)
 
 ```json
 {
   "mcpServers": {
     "aws-s3": {
       "command": "npx",
-      "args": ["aws-s3"],
+      "args": ["@gangadharrr/aws-s3"],
       "env": {
         "AWS_REGION": "us-east-1",
         "AWS_ACCESS_KEY_ID": "your-access-key-id",
@@ -43,40 +45,49 @@ Create a configuration file for the MCP server:
 }
 ```
 
-### Available Tools
+Add this to your MCP client config file:
+- **Claude Desktop:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Cursor:** `.cursor/mcp.json` in your project root
 
-The MCP server provides the following tools:
+### 2. Using AWS CLI credentials (recommended for local dev)
 
-| Tool Name | Description | Parameters |
-|-----------|-------------|------------|
-| `list_buckets` | Lists all S3 buckets in the AWS account | None |
-| `create_bucket` | Creates a new S3 bucket | `bucketName` (required), `region` (optional) |
-| `delete_bucket` | Deletes an empty S3 bucket | `bucketName` (required) |
-| `list_objects` | Lists objects in a bucket | `bucketName` (required), `prefix`, `maxKeys`, `continuationToken` (all optional) |
-| `upload_object` | Uploads a file or content to a bucket | `bucketName`, `key` (both required), `filePath`, `content`, `contentType` (all optional) |
-| `download_object` | Downloads an object from a bucket | `bucketName`, `key` (both required), `outputPath`, `returnContent` (both optional) |
-| `delete_object` | Deletes an object from a bucket | `bucketName`, `key` (both required) |
-| `get_bucket_policy` | Gets the policy for a bucket | `bucketName` (required) |
-| `set_bucket_policy` | Sets or updates a bucket policy | `bucketName`, `policy` (both required) |
+If you've already configured the AWS CLI (`aws configure`), you can omit the key env vars:
 
-## AWS Authentication
+```json
+{
+  "mcpServers": {
+    "aws-s3": {
+      "command": "npx",
+      "args": ["@gangadharrr/aws-s3"],
+      "env": {
+        "AWS_REGION": "us-east-1"
+      }
+    }
+  }
+}
+```
 
-The MCP server uses the AWS SDK, which looks for credentials in the following order:
+---
 
-1. Environment variables (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`)
-2. Shared credentials file (`~/.aws/credentials`)
-3. If running on Amazon EC2, EC2 instance metadata service
+## Available Tools
 
-For local development, you can:
+| Tool | Description |
+|------|-------------|
+| `list_buckets` | List all S3 buckets in the account |
+| `create_bucket` | Create a new S3 bucket |
+| `delete_bucket` | Delete an empty S3 bucket |
+| `list_objects` | List objects in a bucket (with optional prefix filter) |
+| `upload_object` | Upload a file or string content to a bucket |
+| `download_object` | Download an object from a bucket |
+| `delete_object` | Delete an object from a bucket |
+| `get_bucket_policy` | Get the policy attached to a bucket |
+| `set_bucket_policy` | Set or update a bucket policy |
 
-1. Set environment variables in your MCP server configuration
-2. Configure the AWS CLI with `aws configure`
-3. Use AWS IAM roles if running in an AWS environment
+---
 
-## Tool Documentation
+## Tool Reference
 
-### list_buckets
-
+### `list_buckets`
 Lists all S3 buckets in the AWS account.
 
 **Parameters:** None
@@ -86,22 +97,22 @@ Lists all S3 buckets in the AWS account.
 {
   "success": true,
   "buckets": [
-    {
-      "name": "my-bucket",
-      "creationDate": "2023-01-15T00:00:00.000Z"
-    }
+    { "name": "my-bucket", "creationDate": "2023-01-15T00:00:00.000Z" }
   ],
   "count": 1
 }
 ```
 
-### create_bucket
+---
 
-Creates a new S3 bucket with the specified name.
+### `create_bucket`
+Creates a new S3 bucket.
 
 **Parameters:**
-- `bucketName` (string, required): Name of the bucket to create
-- `region` (string, optional): AWS region where the bucket should be created
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `bucketName` | string | ✅ | Name of the bucket to create |
+| `region` | string | ❌ | AWS region (defaults to configured region) |
 
 **Response:**
 ```json
@@ -112,152 +123,97 @@ Creates a new S3 bucket with the specified name.
 }
 ```
 
-### delete_bucket
+---
 
-Deletes an S3 bucket. The bucket must be empty.
-
-**Parameters:**
-- `bucketName` (string, required): Name of the bucket to delete
-
-**Response:**
-```json
-{
-  "success": true,
-  "bucketName": "my-bucket"
-}
-```
-
-### list_objects
-
-Lists objects in an S3 bucket with optional prefix filtering.
+### `list_objects`
+Lists objects in a bucket with optional prefix filtering.
 
 **Parameters:**
-- `bucketName` (string, required): Name of the bucket to list objects from
-- `prefix` (string, optional): Filter objects by prefix (folder path)
-- `maxKeys` (number, optional): Maximum number of objects to return (default: 1000)
-- `continuationToken` (string, optional): Token to retrieve the next set of results
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `bucketName` | string | ✅ | Bucket to list objects from |
+| `prefix` | string | ❌ | Filter by prefix (folder path) |
+| `maxKeys` | number | ❌ | Max results (default: 1000) |
+| `continuationToken` | string | ❌ | Pagination token |
 
-**Response:**
-```json
-{
-  "success": true,
-  "objects": [
-    {
-      "key": "folder/file.txt",
-      "size": 1024,
-      "lastModified": "2023-01-15T00:00:00.000Z",
-      "etag": "\"abc123\"",
-      "storageClass": "STANDARD"
-    }
-  ],
-  "count": 1,
-  "isTruncated": false
-}
-```
+---
 
-### upload_object
-
-Uploads a file or content to an S3 bucket.
+### `upload_object`
+Uploads a file or string content to S3.
 
 **Parameters:**
-- `bucketName` (string, required): Name of the bucket to upload to
-- `key` (string, required): Object key (path) in the bucket
-- `filePath` (string, optional): Local file path to upload
-- `content` (string, optional): String content to upload
-- `contentType` (string, optional): MIME type of the content
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `bucketName` | string | ✅ | Target bucket |
+| `key` | string | ✅ | Object key (path) in the bucket |
+| `filePath` | string | ❌ | Local file path to upload |
+| `content` | string | ❌ | String content to upload directly |
+| `contentType` | string | ❌ | MIME type of the content |
 
-**Response:**
-```json
-{
-  "success": true,
-  "bucketName": "my-bucket",
-  "key": "folder/file.txt",
-  "etag": "\"abc123\""
-}
-```
+---
 
-### download_object
-
-Downloads an object from an S3 bucket.
+### `download_object`
+Downloads an object from S3.
 
 **Parameters:**
-- `bucketName` (string, required): Name of the bucket to download from
-- `key` (string, required): Object key (path) in the bucket
-- `outputPath` (string, optional): Local file path to save the downloaded object
-- `returnContent` (boolean, optional): If true, returns the object content in the response
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `bucketName` | string | ✅ | Source bucket |
+| `key` | string | ✅ | Object key (path) to download |
+| `outputPath` | string | ❌ | Local path to save the file |
+| `returnContent` | boolean | ❌ | Return content inline in response |
 
-**Response:**
-```json
-{
-  "success": true,
-  "bucketName": "my-bucket",
-  "key": "folder/file.txt",
-  "outputPath": "/local/path/file.txt",
-  "content": "File content if returnContent is true",
-  "contentType": "text/plain",
-  "size": 1024
-}
-```
+---
 
-### delete_object
-
-Deletes an object from an S3 bucket.
+### `delete_object`
+Deletes an object from a bucket.
 
 **Parameters:**
-- `bucketName` (string, required): Name of the bucket containing the object
-- `key` (string, required): Object key (path) to delete
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `bucketName` | string | ✅ | Bucket containing the object |
+| `key` | string | ✅ | Object key to delete |
 
-**Response:**
-```json
-{
-  "success": true,
-  "bucketName": "my-bucket",
-  "key": "folder/file.txt"
-}
-```
+---
 
-### get_bucket_policy
+### `get_bucket_policy` / `set_bucket_policy`
+Get or set the IAM policy for a bucket.
 
-Retrieves the policy for an S3 bucket.
+**Parameters for `set_bucket_policy`:**
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `bucketName` | string | ✅ | Target bucket |
+| `policy` | string/object | ✅ | Policy document (JSON string or object) |
 
-**Parameters:**
-- `bucketName` (string, required): Name of the bucket to get the policy for
+---
 
-**Response:**
-```json
-{
-  "success": true,
-  "bucketName": "my-bucket",
-  "policy": {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": "*",
-        "Action": "s3:GetObject",
-        "Resource": "arn:aws:s3:::my-bucket/*"
-      }
-    ]
-  }
-}
-```
+## AWS Authentication
 
-### set_bucket_policy
+The server uses the AWS SDK credential resolution chain in this order:
 
-Sets or updates the policy for an S3 bucket.
+1. **Environment variables** — `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`
+2. **Shared credentials file** — `~/.aws/credentials` (configured via `aws configure`)
+3. **EC2 Instance Metadata** — if running on an EC2 instance with an IAM role
 
-**Parameters:**
-- `bucketName` (string, required): Name of the bucket to set the policy for
-- `policy` (string or object, required): The policy document as a JSON string or object
+For production, IAM roles are recommended over static credentials.
 
-**Response:**
-```json
-{
-  "success": true,
-  "bucketName": "my-bucket"
-}
-```
+---
+
+## Contributing
+
+Contributions are welcome! If you'd like to add a new S3 operation or improve existing ones:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-new-tool`
+3. Commit your changes: `git commit -m 'Add: new S3 tool'`
+4. Push and open a Pull Request
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](./LICENSE) for details.
+
+---
+
+*Built with the [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) and [AWS SDK v3](https://github.com/aws/aws-sdk-js-v3).*
